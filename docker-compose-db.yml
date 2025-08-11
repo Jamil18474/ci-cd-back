@@ -40,22 +40,6 @@ services:
       - NODE_ENV=${NODE_ENV}
       - FRONTEND_URL=${FRONTEND_URL}
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: user_management_frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    networks:
-      - app-network
-    environment:
-      # ✅ Variables frontend
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
-      - NODE_ENV=${NODE_ENV}
-
 volumes:
   mongodb_data:
 
