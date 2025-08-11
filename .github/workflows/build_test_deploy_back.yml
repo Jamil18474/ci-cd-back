@@ -1,38 +1,56 @@
+# Documentation for GitHub Actions Workflow: Build, Test and Deploy Backend
+
+# Workflow Name: Build, Test and Deploy Backend
 name: Build, Test and Deploy Backend
 
+# Controls when the workflow will run.
 on:
+  # Triggers the workflow on push or pull request events for the 'main' branch.
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  # Allows manual triggering from the GitHub Actions UI.
   workflow_dispatch:
 
+# The workflow is composed of three jobs that run sequentially.
 jobs:
+  # Job 1: Build and Test Backend
   build_test:
+    # Runs on the latest Ubuntu runner.
     runs-on: ubuntu-latest
+    # Sets the working directory for all steps in this job.
     defaults:
       run:
         working-directory: ./backend
+    # Uses a matrix for Node.js version (currently only 20.x).
     strategy:
       matrix:
         node-version: [20.x]
     steps:
+      # Step 1: Checkout the codebase.
       - uses: actions/checkout@v4
 
+      # Step 2: Set up the required Node.js version.
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
+      # Step 3: Install dependencies and run tests.
       - name: Install dependencies and test
         run: |
           npm ci
           npm test
 
+  # Job 2: Deploy Backend to Render
   deploy_to_render:
+    # Runs on the latest Ubuntu runner.
     runs-on: ubuntu-latest
+    # This job starts only after build_test is successful.
     needs: build_test
     steps:
+      # Step 1: Deploy the backend service to Render using the Render GitHub Action.
       - name: Deploy to Render
         uses: johnbeynon/render-deploy-action@v0.0.8
         with:
@@ -40,10 +58,14 @@ jobs:
           api-key: ${{ secrets.MY_RENDER_API_KEY }}
           wait-for-success: true
 
+  # Job 3: Trigger Frontend Workflow
   trigger-frontend:
+    # Runs on the latest Ubuntu runner.
     runs-on: ubuntu-latest
+    # This job starts only after deploy_to_render is successful.
     needs: deploy_to_render
     steps:
+      # Step 1: Dispatch a repository_dispatch event to the frontend repository to trigger its workflow.
       - name: Trigger frontend workflow
         run: |
           curl -L \
