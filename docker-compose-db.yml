@@ -11,15 +11,17 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
 
-      # Variables admin (optionnel)
+      # Variables admin
       ADMIN_EMAIL: ${ADMIN_EMAIL}
-      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      # Variables user
+      USER_EMAIL: ${USER_EMAIL}
+      USER_PASSWORD: ${USER_PASSWORD}
+
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-    networks:
-      - app-network
 
   backend:
     build:
@@ -30,8 +32,6 @@ services:
       - "8000:8000"
     depends_on:
       - mongodb
-    networks:
-      - app-network
     environment:
       # ✅ URI MongoDB construite avec variables
       - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_INITDB_DATABASE}?authSource=admin
@@ -42,7 +42,3 @@ services:
 
 volumes:
   mongodb_data:
-
-networks:
-  app-network:
-    driver: bridge

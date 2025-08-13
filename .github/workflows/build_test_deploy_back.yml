@@ -42,7 +42,8 @@ jobs:
         run: |
           npm ci
           npm test
-
+        env:
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
   # Job 2: Deploy Backend to Render
   deploy_to_render:
     # Runs on the latest Ubuntu runner.

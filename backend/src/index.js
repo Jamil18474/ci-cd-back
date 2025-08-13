@@ -4,7 +4,7 @@ const cors = require('cors');
 require('dotenv').config({ debug: false });
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-
+const seedUsers = require('./seed/seedUsers')
 const app = express();
 const PORT = process.env.PORT;
 
@@ -67,7 +67,7 @@ async function startServer() {
     if (!mongoConnected) {
       process.exit(1);
     }
-
+    await seedUsers();
     const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Serveur démarré sur le port ${PORT}`);
     });
