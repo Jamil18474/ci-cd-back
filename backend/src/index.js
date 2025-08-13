@@ -1,10 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet'); // ✅ Ajout de helmet
 require('dotenv').config({ debug: false });
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-const seedUsers = require('./seed/seedUsers')
+const seedUsers = require('./seed/seedUsers');
+const rateLimit = require('express-rate-limit'); // ✅ Ajout du rate limit
 const app = express();
 const PORT = process.env.PORT;
 
@@ -15,6 +17,21 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.use(helmet()); // ✅ Protection HTTP headers
+
+// Limiter les tentatives de login pour éviter le brute-force
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 10,                  // 10 tentatives max par IP
+  message: {
+    message: 'Trop de tentatives de connexion, veuillez réessayer dans 10 minutes.',
+    code: 'TOO_MANY_LOGIN_ATTEMPTS'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/auth/login', loginLimiter);
 
 app.use(express.json());
 
@@ -33,8 +50,6 @@ app.get('/', (req, res) => {
     status: 'healthy'
   });
 });
-
-
 
 /**
  * Connects to MongoDB database
@@ -108,6 +123,19 @@ process.on('unhandledRejection', (reason) => {
 process.on('uncaughtException', (error) => {
   console.error('❌ Exception non gérée:', error.message);
   gracefulShutdown();
+});
+
+// Gestion centralisée des erreurs (ne jamais exposer stack en prod)
+app.use((err, req, res, next) => {
+  console.error('❌ Erreur Express :', err);
+  res.status(err.status || 500).json({
+    message: process.env.NODE_ENV === 'production'
+        ? 'Une erreur interne est survenue.'
+        : err.message,
+    error: process.env.NODE_ENV === 'production'
+        ? undefined
+        : err.stack
+  });
 });
 
 startServer();
