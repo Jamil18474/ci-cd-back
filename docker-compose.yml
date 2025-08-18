@@ -12,9 +12,11 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
 
       # Variables admin
+
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       # Variables user
+
       USER_EMAIL: ${USER_EMAIL}
       USER_PASSWORD: ${USER_PASSWORD}
 
@@ -39,6 +41,8 @@ services:
       - PORT=${PORT}
       - NODE_ENV=${NODE_ENV}
       - FRONTEND_URL=${FRONTEND_URL}
+      - BCRYPT_ROUNDS=${BCRYPT_ROUNDS}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
 
 volumes:
   mongodb_data:

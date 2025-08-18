@@ -1,29 +1,34 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const helmet = require('helmet'); // ✅ Ajout de helmet
+const helmet = require('helmet');
 require('dotenv').config({ debug: false });
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-const seedUsers = require('./seed/seedUsers');
-const rateLimit = require('express-rate-limit'); // ✅ Ajout du rate limit
+const seedUsers = require('./seed/seedUsersProd');
+const rateLimit = require('express-rate-limit');
+
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('../swagger');
+
+
 const app = express();
 const PORT = process.env.PORT;
 
-// CORS configuration
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+app.use(helmet());
 
-app.use(helmet()); // ✅ Protection HTTP headers
-
-// Limiter les tentatives de login pour éviter le brute-force
 const loginLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 10,                  // 10 tentatives max par IP
+  windowMs: 10 * 60 * 1000,
+  max: 10,
   message: {
     message: 'Trop de tentatives de connexion, veuillez réessayer dans 10 minutes.',
     code: 'TOO_MANY_LOGIN_ATTEMPTS'
@@ -34,15 +39,9 @@ const loginLimiter = rateLimit({
 app.use('/api/auth/login', loginLimiter);
 
 app.use(express.json());
-
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
-/**
- * Health check endpoint
- * @returns {Object} API status and basic information
- */
 app.get('/', (req, res) => {
   res.json({
     message: 'API User Management',
@@ -51,83 +50,9 @@ app.get('/', (req, res) => {
   });
 });
 
-/**
- * Connects to MongoDB database
- * @async
- * @returns {Promise<boolean>} Connection success status
- */
-async function connectMongoDB() {
-  try {
-    if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI non définie dans les variables d\'environnement');
-    }
 
-    await mongoose.connect(process.env.MONGODB_URI);
-    return true;
-  } catch (error) {
-    console.error('❌ Erreur connexion MongoDB:', error.message);
-    return false;
-  }
-}
-
-/**
- * Starts the Express server
- * @async
- * @returns {Promise<Server>} Express server instance
- */
-async function startServer() {
-  try {
-    const mongoConnected = await connectMongoDB();
-
-    if (!mongoConnected) {
-      process.exit(1);
-    }
-    await seedUsers();
-    const server = app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-    });
-
-    server.keepAliveTimeout = 65000;
-    server.headersTimeout = 66000;
-
-    return server;
-  } catch (error) {
-    console.error('❌ Erreur démarrage serveur:', error.message);
-    process.exit(1);
-  }
-}
-
-/**
- * Graceful shutdown handler
- * @async
- */
-async function gracefulShutdown() {
-  try {
-    if (mongoose.connection.readyState === 1) {
-      await mongoose.connection.close();
-    }
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Erreur lors de l\'arrêt:', error.message);
-    process.exit(1);
-  }
-}
-
-process.on('SIGINT', gracefulShutdown);
-process.on('SIGTERM', gracefulShutdown);
-
-process.on('unhandledRejection', (reason) => {
-  console.error('❌ Promesse rejetée non gérée:', reason);
-});
-
-process.on('uncaughtException', (error) => {
-  console.error('❌ Exception non gérée:', error.message);
-  gracefulShutdown();
-});
-
-// Gestion centralisée des erreurs (ne jamais exposer stack en prod)
 app.use((err, req, res, next) => {
-  console.error('❌ Erreur Express :', err);
+  console.error('❌ Express Error:', err);
   res.status(err.status || 500).json({
     message: process.env.NODE_ENV === 'production'
         ? 'Une erreur interne est survenue.'
@@ -138,4 +63,31 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Démarrage serveur
+async function connectMongoDB() {
+  try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI not set in env');
+    }
+    await mongoose.connect(process.env.MONGODB_URI);
+    return true;
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error.message);
+    return false;
+  }
+}
+async function startServer() {
+  try {
+    const mongoConnected = await connectMongoDB();
+    if (!mongoConnected) process.exit(1);
+    await seedUsers();
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server listening on port ${PORT}`);
+      console.log(`📚 Swagger docs on http://localhost:${PORT}/api-docs`);
+    });
+  } catch (error) {
+    console.error('❌ Server start error:', error.message);
+    process.exit(1);
+  }
+}
 startServer();

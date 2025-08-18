@@ -4,74 +4,107 @@ const authController = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
 
 /**
- * @route POST /api/auth/register
- * @desc Register a new user
- * @access Public
+ * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Authentication & Registration
+ */
+
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - password
+ *               - birthDate
+ *               - city
+ *               - postalCode
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 example: Patrick
+ *               lastName:
+ *                 type: string
+ *                 example: Dupont
+ *               email:
+ *                 type: string
+ *                 example: patrick.dupont@company.local
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *               birthDate:
+ *                 type: string
+ *                 format: date
+ *                 example: 1990-01-01
+ *               city:
+ *                 type: string
+ *                 example: Lyon
+ *               postalCode:
+ *                 type: string
+ *                 example: 69001
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Validation error
  */
 router.post('/register', authController.register);
 
 /**
- * @route POST /api/auth/login
- * @desc Authenticate user and return JWT token
- * @access Public
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Authenticate user and return JWT
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: patrick.dupont@company.local
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Authentication successful, returns JWT and user info
+ *       401:
+ *         description: Invalid credentials
  */
 router.post('/login', authController.login);
 
 /**
- * @route POST /api/auth/logout
- * @desc Logout user
- * @access Private
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user (requires JWT)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       401:
+ *         description: Unauthorized
  */
 router.post('/logout', authenticateToken, authController.logout);
-
-/**
- * @route GET /api/auth/me
- * @desc Get current user from token
- * @access Private
- */
-router.get('/me', authenticateToken, (req, res) => {
-  try {
-
-
-    res.json({
-      message: 'Token valide',
-      user: {
-        id: req.user.userId,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        email: req.user.email,
-        role: req.user.role,
-        permissions: req.user.permissions
-      },
-      tokenInfo: {
-        issuedAt: new Date(req.user.iat * 1000).toISOString(),
-        expiresAt: new Date(req.user.exp * 1000).toISOString()
-      }
-    });
-  } catch (error) {
-    console.error('❌ Erreur vérification token:', error);
-    res.status(500).json({
-      message: 'Erreur lors de la vérification du token',
-      error: error.message
-    });
-  }
-});
-
-// ✅ Route de diagnostic JWT
-router.get('/token-info', authenticateToken, (req, res) => {
-  const now = Date.now() / 1000;
-  const timeLeft = req.user.exp - now;
-
-  res.json({
-    currentTime: new Date().toISOString(),
-    tokenIssuedAt: new Date(req.user.iat * 1000).toISOString(),
-    tokenExpiresAt: new Date(req.user.exp * 1000).toISOString(),
-    timeLeftSeconds: Math.round(timeLeft),
-    timeLeftMinutes: Math.round(timeLeft / 60),
-    timeLeftHours: Math.round(timeLeft / 3600),
-    user: req.user.email,
-    role: req.user.role
-  });
-});
 
 module.exports = router;
