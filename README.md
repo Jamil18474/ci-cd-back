@@ -62,7 +62,6 @@ cd ci-cd-back
 ```bash
 cd backend
 npm install
-cd ..
 ```
 
 ---
@@ -115,7 +114,6 @@ The recommended way to run the backend (with MongoDB) is via Docker Compose.
 From the project root directory (where `docker-compose.yml` is located):
 
 ```bash
-cd user-management-backend
 docker-compose -f docker-compose.yml up --build -d
 ```
 
