@@ -21,7 +21,7 @@ This is the **backend API** for the User Management application. It provides aut
 ## Production URLs
 
 - **API Production URL**: [https://ci-cd-back-dbsx.onrender.com](https://ci-cd-back-dbsx.onrender.com)
-- **Frontend Client (Production)**: [https://jamil18474.github.io](https://jamil18474.github.io)
+- **Frontend Client (Production)**: [https://jamil18474.github.io/ci-cd-react/](https://jamil18474.github.io/ci-cd-react/)
 
 ---
 
