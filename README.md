@@ -53,8 +53,8 @@ This is the **backend API** for the User Management application. It provides aut
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/user-management-backend.git
-cd user-management-backend
+git clone https://github.com/Jamil18474/ci-cd-back.git
+cd ci-cd-back
 ```
 
 2. **Install dependencies**
@@ -83,8 +83,7 @@ All sensitive or environment-specific values are managed through `.env.template`
 **How to set up:**
 
 ```bash
-# At project root
-cd user-management-backend 
+# At project root 
 cp .env.template .env
 
 # In backend folder
@@ -117,7 +116,7 @@ From the project root directory (where `docker-compose.yml` is located):
 
 ```bash
 cd user-management-backend
-docker-compose -f docker-compose-db.yml up --build -d
+docker-compose -f docker-compose.yml up --build -d
 ```
 
 - This will start:
@@ -133,11 +132,10 @@ docker-compose -f docker-compose-db.yml up --build -d
 
 ### Stopping and Removing Docker Containers and Volumes
 
-To **stop and remove all containers and also delete the database volumes** (resetting your data), use:
+To **stop and remove all containers and also delete the database volumes** (resetting your data), from the project root directory (where `docker-compose.yml` is located), use:
 
 ```bash
-cd user-management-backend
-docker-compose -f docker-compose-db.yml down -v
+docker-compose -f docker-compose.yml down -v
 ```
 
 > This is useful if you want to re-seed your database and ensure all initialization scripts (users, etc.) are re-applied from scratch.
@@ -189,10 +187,10 @@ You can use these credentials to log in via Swagger UI, Postman, or your fronten
 - Tests are written with **Jest**.
 - To run all tests:
 
-    ```bash
-    cd backend
-    npm run test
-    ```
+```bash
+cd backend
+npm run test
+```
 
 ---
 
