@@ -1,4 +1,10 @@
-#### 1.0.0 (2025-08-19)
+#### 1.0.0 (2025-08-20)
+
+##### Chores
+
+*  update README.md (d6db06ba)
+*  update README.md (ee11126c)
+*  final cleanup and project wrap-up (7c4d9153)
 
 ##### Continuous Integration
 
@@ -10,8 +16,13 @@
 
 ##### New Features
 
+* **config:**  update environment variables (bc4f3e77)
 * **swagger:**  improve and document Swagger/OpenAPI configuration (be7407a1)
 * **security:**  add helmet and login rate limiting to enhance backend security (f8ebd4d8)
 * **seed:**  add user seeding in Node and Mongo init scripts (4b80c365)
 *  configure Render deployment, environment variables, and backend CI/CD workflow (02f0433b)
+
+##### Bug Fixes
+
+* **cors:**  use correct FRONTEND_URL for CORS config (c205553d)
 
