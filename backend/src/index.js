@@ -15,6 +15,7 @@ const swaggerSpec = require('../swagger');
 const app = express();
 const PORT = process.env.PORT;
 
+app.set('trust proxy', 1);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
@@ -83,7 +84,6 @@ async function startServer() {
     await seedUsers();
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server listening on port ${PORT}`);
-      console.log(`📚 Swagger docs on http://localhost:${PORT}/api-docs`);
     });
   } catch (error) {
     console.error('❌ Server start error:', error.message);

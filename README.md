@@ -124,8 +124,6 @@ docker-compose -f docker-compose.yml up --build -d
 
 2. **API will be available at**: [http://localhost:8000](http://localhost:8000)
 
-3. **MongoDB will be on**: [localhost:27017](mongodb://localhost:27017)
-
 ---
 
 ### Stopping and Removing Docker Containers and Volumes
@@ -146,6 +144,7 @@ The API is documented and testable in your browser using **Swagger UI**.
 
 - **Access the Swagger UI:**  
   [http://localhost:8000/api-docs](http://localhost:8000/api-docs) (when running locally with Docker Compose or `npm run dev`)
+  or in production : [https://ci-cd-back-dbsx.onrender.com/api-docs](https://ci-cd-back-dbsx.onrender.com/api-docs/)
 - Here you can view all endpoints, see required/requested data, and try out requests directly in the browser.
 - **Tip:** Secure endpoints require JWT authentication. Use the `/api/auth/login` route to obtain a token, then use the "Authorize" button in Swagger UI to authenticate your requests.
 - **To log out in Swagger UI:** Click on the "Authorize" button (top right), then click the "Logout" button in the modal window. This will remove your JWT from Swagger and de-authenticate your session.
